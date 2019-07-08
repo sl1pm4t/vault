@@ -80,7 +80,7 @@ type backend struct {
 	// roleCache caches role entries to avoid locking headaches
 	roleCache *cache.Cache
 
-	resolveArnToUniqueIDFunc func(context.Context, logical.Storage, string) (string, error)
+	resolveArnToUniqueIDFunc func(context.Context, logical.Storage, string, *string) (string, error)
 
 	// upgradeCancelFunc is used to cancel the context used in the upgrade
 	// function
@@ -233,27 +233,25 @@ func (b *backend) invalidate(ctx context.Context, key string) {
 
 // Putting this here so we can inject a fake resolver into the backend for unit testing
 // purposes
-func (b *backend) resolveArnToRealUniqueId(ctx context.Context, s logical.Storage, arn string) (string, error) {
+func (b *backend) resolveArnToRealUniqueId(ctx context.Context, s logical.Storage, arn string, userProvidedRegion *string) (string, error) {
 	entity, err := parseIamArn(arn)
 	if err != nil {
 		return "", err
 	}
-	// This odd-looking code is here because IAM is an inherently global service. IAM and STS ARNs
-	// don't have regions in them, and there is only a single global endpoint for IAM; see
-	// http://docs.aws.amazon.com/general/latest/gr/rande.html#iam_region
-	// However, the ARNs do have a partition in them, because the GovCloud and China partitions DO
-	// have their own separate endpoints, and the partition is encoded in the ARN. If Amazon's Go SDK
-	// would allow us to pass a partition back to the IAM client, it would be much simpler. But it
-	// doesn't appear that's possible, so in order to properly support GovCloud and China, we do a
-	// circular dance of extracting the partition from the ARN, finding any arbitrary region in the
-	// partition, and passing that region back back to the SDK, so that the SDK can figure out the
-	// proper partition from the arbitrary region we passed in to look up the endpoint.
-	// Sigh
-	region := getAnyRegionForAwsPartition(entity.Partition)
-	if region == nil {
-		return "", fmt.Errorf("unable to resolve partition %q to a region", entity.Partition)
+	region := ""
+	if userProvidedRegion != nil {
+		// Use whatever the user designated. This designation is set as the `client_region` on the role.
+		region = *userProvidedRegion
+	} else {
+		// Fall back to picking a region based on the entity's partition.
+		regionInfo := getAnyRegionForAwsPartition(entity.Partition)
+		if regionInfo == nil {
+			return "", fmt.Errorf("unable to resolve partition %q to a region", entity.Partition)
+		}
+		region = regionInfo.ID()
 	}
-	iamClient, err := b.clientIAM(ctx, s, region.ID(), entity.AccountNumber)
+
+	iamClient, err := b.clientIAM(ctx, s, region, entity.AccountNumber)
 	if err != nil {
 		return "", awsutil.AppendLogicalError(err)
 	}
@@ -296,7 +294,6 @@ func (b *backend) resolveArnToRealUniqueId(ctx context.Context, s logical.Storag
 func getAnyRegionForAwsPartition(partitionId string) *endpoints.Region {
 	resolver := endpoints.DefaultResolver()
 	partitions := resolver.(endpoints.EnumPartitions).Partitions()
-
 	for _, p := range partitions {
 		if p.ID() == partitionId {
 			for _, r := range p.Regions() {

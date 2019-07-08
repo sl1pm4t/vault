@@ -1018,7 +1018,7 @@ func (b *backend) pathLoginRenewIam(ctx context.Context, req *logical.Request, d
 				if err != nil {
 					return nil, errwrap.Wrapf(fmt.Sprintf("error parsing ARN %q: {{err}}", canonicalArn), err)
 				}
-				fullArn, err = b.fullArn(ctx, entity, req.Storage)
+				fullArn, err = b.fullArn(ctx, entity, req.Storage, roleEntry.ClientRegion)
 				if err != nil {
 					return nil, errwrap.Wrapf(fmt.Sprintf("error looking up full ARN of entity %v: {{err}}", entity), err)
 				}
@@ -1272,7 +1272,7 @@ func (b *backend) pathLoginUpdateIam(ctx context.Context, req *logical.Request, 
 			// evaluate check 3
 			fullArn := b.getCachedUserId(callerUniqueId)
 			if fullArn == "" {
-				fullArn, err = b.fullArn(ctx, entity, req.Storage)
+				fullArn, err = b.fullArn(ctx, entity, req.Storage, roleEntry.ClientRegion)
 				if err != nil {
 					return logical.ErrorResponse(fmt.Sprintf("error looking up full ARN of entity %v: %v", entity, err)), nil
 				}
@@ -1616,9 +1616,16 @@ func (e *iamEntity) canonicalArn() string {
 }
 
 // This returns the "full" ARN of an iamEntity, how it would be referred to in AWS proper
-func (b *backend) fullArn(ctx context.Context, e *iamEntity, s logical.Storage) (string, error) {
-	// Not assuming path is reliable for any entity types
-	client, err := b.clientIAM(ctx, s, getAnyRegionForAwsPartition(e.Partition).ID(), e.AccountNumber)
+func (b *backend) fullArn(ctx context.Context, e *iamEntity, s logical.Storage, userProvidedRegion *string) (string, error) {
+	region := ""
+	if userProvidedRegion != nil {
+		// Use whatever the user designated. This designation is set as the `client_region` on the role.
+		region = *userProvidedRegion
+	} else {
+		// Fall back to picking a region based on the entity's partition.
+		region = getAnyRegionForAwsPartition(e.Partition).ID()
+	}
+	client, err := b.clientIAM(ctx, s, region, e.AccountNumber)
 	if err != nil {
 		return "", errwrap.Wrapf("error creating IAM client: {{err}}", err)
 	}
