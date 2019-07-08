@@ -173,7 +173,7 @@ auth_type is ec2.`,
         applicable when auth_type is ec2.`,
 			},
 
-			"client_region": {
+			"iam_client_region": {
 				Type:        framework.TypeString,
 				Description: `If set, designates the region that will be used to communicate with AWS regarding this role.`,
 			},
@@ -468,7 +468,7 @@ func (b *backend) upgradeRole(ctx context.Context, s logical.Storage, roleEntry 
 			roleEntry.BoundIamPrincipalARN != "" &&
 			roleEntry.BoundIamPrincipalID == "" &&
 			!strings.HasSuffix(roleEntry.BoundIamPrincipalARN, "*") {
-			principalId, err := b.resolveArnToUniqueIDFunc(ctx, s, roleEntry.BoundIamPrincipalARN, roleEntry.ClientRegion)
+			principalId, err := b.resolveArnToUniqueIDFunc(ctx, s, roleEntry.BoundIamPrincipalARN, roleEntry.IAMClientRegion)
 			if err != nil {
 				return false, err
 			}
@@ -694,17 +694,17 @@ func (b *backend) pathRoleCreateUpdate(ctx context.Context, req *logical.Request
 		roleEntry.BoundIamPrincipalIDs = []string{}
 	}
 
-	if regionRaw, ok := data.GetOk("client_region"); ok {
-		region := regionRaw.(string)
-		if region == "unset" {
+	if iamClientRegionRaw, ok := data.GetOk("iam_client_region"); ok {
+		iamClientRegion := iamClientRegionRaw.(string)
+		if iamClientRegion == "unset" {
 			// If the user provides this string, they can remove previous settings and roll back to default behavior.
-			roleEntry.ClientRegion = nil
-			b.Logger().Debug(`client_region is now unset`)
+			roleEntry.IAMClientRegion = nil
+			b.Logger().Debug(`iam_client_region is now unset`)
 		} else {
 			// Using GetOrDefaultRegion adds support for also pulling these from Vault's environment.
-			region := awsutil.GetOrDefaultRegion(b.Logger(), region)
-			roleEntry.ClientRegion = &region
-			b.Logger().Debug(fmt.Sprintf(`client_region set to %s`, region))
+			resultingRegion := awsutil.GetOrDefaultRegion(b.Logger(), iamClientRegion)
+			roleEntry.IAMClientRegion = &resultingRegion
+			b.Logger().Debug(fmt.Sprintf(`iam_client_region set to %s`, resultingRegion))
 		}
 	}
 
@@ -712,7 +712,7 @@ func (b *backend) pathRoleCreateUpdate(ctx context.Context, req *logical.Request
 		// we might be turning on resolution on this role, so ensure we update the IDs
 		for _, principalARN := range roleEntry.BoundIamPrincipalARNs {
 			if !strings.HasSuffix(principalARN, "*") {
-				principalID, err := b.resolveArnToUniqueIDFunc(ctx, req.Storage, principalARN, roleEntry.ClientRegion)
+				principalID, err := b.resolveArnToUniqueIDFunc(ctx, req.Storage, principalARN, roleEntry.IAMClientRegion)
 				if err != nil {
 					return logical.ErrorResponse(fmt.Sprintf("unable to resolve ARN %#v to internal ID: %s", principalARN, err.Error())), nil
 				}
@@ -966,7 +966,7 @@ type awsRoleEntry struct {
 	BoundRegions                []string `json:"bound_region_list"`
 	BoundSubnetIDs              []string `json:"bound_subnet_id_list"`
 	BoundVpcIDs                 []string `json:"bound_vpc_id_list"`
-	ClientRegion                *string  `json:"client_region"` // Will be nil if unset by the user.
+	IAMClientRegion             *string  `json:"iam_client_region"` // Will be nil if unset by the user.
 	InferredEntityType          string   `json:"inferred_entity_type"`
 	InferredAWSRegion           string   `json:"inferred_aws_region"`
 	ResolveAWSUniqueIDs         bool     `json:"resolve_aws_unique_ids"`
@@ -1007,7 +1007,7 @@ func (r *awsRoleEntry) ToResponseData() map[string]interface{} {
 		"bound_region":                   r.BoundRegions,
 		"bound_subnet_id":                r.BoundSubnetIDs,
 		"bound_vpc_id":                   r.BoundVpcIDs,
-		"client_region":                  fmt.Sprintf("%s", r.ClientRegion),
+		"iam_client_region":              fmt.Sprintf("%s", r.IAMClientRegion),
 		"inferred_entity_type":           r.InferredEntityType,
 		"inferred_aws_region":            r.InferredAWSRegion,
 		"resolve_aws_unique_ids":         r.ResolveAWSUniqueIDs,

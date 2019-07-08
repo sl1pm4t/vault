@@ -233,15 +233,15 @@ func (b *backend) invalidate(ctx context.Context, key string) {
 
 // Putting this here so we can inject a fake resolver into the backend for unit testing
 // purposes
-func (b *backend) resolveArnToRealUniqueId(ctx context.Context, s logical.Storage, arn string, userProvidedRegion *string) (string, error) {
+func (b *backend) resolveArnToRealUniqueId(ctx context.Context, s logical.Storage, arn string, iamClientRegion *string) (string, error) {
 	entity, err := parseIamArn(arn)
 	if err != nil {
 		return "", err
 	}
 	region := ""
-	if userProvidedRegion != nil {
-		// Use whatever the user designated. This designation is set as the `client_region` on the role.
-		region = *userProvidedRegion
+	if iamClientRegion != nil {
+		// Use whatever the user designated.
+		region = *iamClientRegion
 	} else {
 		// Fall back to picking a region based on the entity's partition.
 		regionInfo := getAnyRegionForAwsPartition(entity.Partition)
@@ -250,7 +250,6 @@ func (b *backend) resolveArnToRealUniqueId(ctx context.Context, s logical.Storag
 		}
 		region = regionInfo.ID()
 	}
-
 	iamClient, err := b.clientIAM(ctx, s, region, entity.AccountNumber)
 	if err != nil {
 		return "", awsutil.AppendLogicalError(err)
@@ -294,6 +293,7 @@ func (b *backend) resolveArnToRealUniqueId(ctx context.Context, s logical.Storag
 func getAnyRegionForAwsPartition(partitionId string) *endpoints.Region {
 	resolver := endpoints.DefaultResolver()
 	partitions := resolver.(endpoints.EnumPartitions).Partitions()
+
 	for _, p := range partitions {
 		if p.ID() == partitionId {
 			for _, r := range p.Regions() {
