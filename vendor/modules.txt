@@ -43,8 +43,9 @@ github.com/DataDog/datadog-go/statsd
 github.com/Jeffail/gabs
 # github.com/Masterminds/semver v1.4.2
 github.com/Masterminds/semver
-# github.com/Microsoft/go-winio v0.4.12
+# github.com/Microsoft/go-winio v0.4.13
 github.com/Microsoft/go-winio
+github.com/Microsoft/go-winio/pkg/guid
 # github.com/NYTimes/gziphandler v1.1.1
 github.com/NYTimes/gziphandler
 # github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5
@@ -150,7 +151,7 @@ github.com/briankassouf/jose/crypto
 github.com/briankassouf/jose/jws
 github.com/briankassouf/jose/jwt
 github.com/briankassouf/jose
-# github.com/cenkalti/backoff v2.1.1+incompatible
+# github.com/cenkalti/backoff v2.2.1+incompatible
 github.com/cenkalti/backoff
 # github.com/census-instrumentation/opencensus-proto v0.2.0
 github.com/census-instrumentation/opencensus-proto/gen-go/agent/common/v1
@@ -175,7 +176,7 @@ github.com/circonus-labs/circonusllhist
 github.com/cloudfoundry-community/go-cfclient
 # github.com/cockroachdb/cockroach-go v0.0.0-20181001143604-e0a95dfd547c
 github.com/cockroachdb/cockroach-go/crdb
-# github.com/containerd/continuity v0.0.0-20181203112020-004b46473808
+# github.com/containerd/continuity v0.0.0-20190426062206-aaeac12a7ffc
 github.com/containerd/continuity/pathdriver
 # github.com/coreos/go-oidc v2.0.0+incompatible
 github.com/coreos/go-oidc
@@ -196,7 +197,7 @@ github.com/dgrijalva/jwt-go
 github.com/dimchansky/utfbom
 # github.com/docker/go-connections v0.4.0
 github.com/docker/go-connections/nat
-# github.com/docker/go-units v0.3.3
+# github.com/docker/go-units v0.4.0
 github.com/docker/go-units
 # github.com/duosecurity/duo_api_golang v0.0.0-20190308151101-6c680f768e74
 github.com/duosecurity/duo_api_golang
@@ -339,6 +340,8 @@ github.com/hashicorp/vault-plugin-auth-gcp/plugin
 github.com/hashicorp/vault-plugin-auth-gcp/plugin/cache
 # github.com/hashicorp/vault-plugin-auth-jwt v0.5.2-0.20190730042527-3d85d12ec6b6
 github.com/hashicorp/vault-plugin-auth-jwt
+# github.com/hashicorp/vault-plugin-auth-kerberos v0.0.0-20190801220350-9873e5e3a0ed
+github.com/hashicorp/vault-plugin-auth-kerberos
 # github.com/hashicorp/vault-plugin-auth-kubernetes v0.5.2-0.20190730042533-e4b69df916b8
 github.com/hashicorp/vault-plugin-auth-kubernetes
 # github.com/hashicorp/vault-plugin-auth-pcf v0.0.0-20190730042539-6f948c02ea2d
@@ -425,6 +428,9 @@ github.com/jackc/pgx/pgio
 github.com/jackc/pgx/pgproto3
 github.com/jackc/pgx/pgtype
 github.com/jackc/pgx/chunkreader
+# github.com/jcmturner/gofork v1.0.0
+github.com/jcmturner/gofork/encoding/asn1
+github.com/jcmturner/gofork/x/crypto/pbkdf2
 # github.com/jeffchao/backoff v0.0.0-20140404060208-9d7fd7aa17f2
 github.com/jeffchao/backoff
 # github.com/jefferai/isbadcipher v0.0.0-20190226160619-51d2077c035f
@@ -461,7 +467,7 @@ github.com/konsorten/go-windows-terminal-sequences
 github.com/kr/pretty
 # github.com/kr/text v0.1.0
 github.com/kr/text
-# github.com/lib/pq v1.1.1
+# github.com/lib/pq v1.2.0
 github.com/lib/pq
 github.com/lib/pq/oid
 github.com/lib/pq/scram
@@ -571,7 +577,7 @@ github.com/ryanuber/go-glob
 github.com/samuel/go-zookeeper/zk
 # github.com/satori/go.uuid v1.2.0
 github.com/satori/go.uuid
-# github.com/sirupsen/logrus v1.2.0
+# github.com/sirupsen/logrus v1.4.2
 github.com/sirupsen/logrus
 # github.com/stretchr/testify v1.3.0
 github.com/stretchr/testify/assert
@@ -775,6 +781,47 @@ gopkg.in/asn1-ber.v1
 gopkg.in/inf.v0
 # gopkg.in/ini.v1 v1.42.0
 gopkg.in/ini.v1
+# gopkg.in/jcmturner/aescts.v1 v1.0.1
+gopkg.in/jcmturner/aescts.v1
+# gopkg.in/jcmturner/dnsutils.v1 v1.0.1
+gopkg.in/jcmturner/dnsutils.v1
+# gopkg.in/jcmturner/goidentity.v2 v2.0.0
+gopkg.in/jcmturner/goidentity.v2
+# gopkg.in/jcmturner/gokrb5.v5 v5.3.0
+gopkg.in/jcmturner/gokrb5.v5/credentials
+gopkg.in/jcmturner/gokrb5.v5/gssapi
+gopkg.in/jcmturner/gokrb5.v5/keytab
+gopkg.in/jcmturner/gokrb5.v5/service
+gopkg.in/jcmturner/gokrb5.v5/iana/nametype
+gopkg.in/jcmturner/gokrb5.v5/types
+gopkg.in/jcmturner/gokrb5.v5/asn1tools
+gopkg.in/jcmturner/gokrb5.v5/crypto
+gopkg.in/jcmturner/gokrb5.v5/iana/chksumtype
+gopkg.in/jcmturner/gokrb5.v5/iana/keyusage
+gopkg.in/jcmturner/gokrb5.v5/krberror
+gopkg.in/jcmturner/gokrb5.v5/messages
+gopkg.in/jcmturner/gokrb5.v5/client
+gopkg.in/jcmturner/gokrb5.v5/config
+gopkg.in/jcmturner/gokrb5.v5/iana/errorcode
+gopkg.in/jcmturner/gokrb5.v5/iana/flags
+gopkg.in/jcmturner/gokrb5.v5/iana
+gopkg.in/jcmturner/gokrb5.v5/iana/addrtype
+gopkg.in/jcmturner/gokrb5.v5/iana/asnAppTag
+gopkg.in/jcmturner/gokrb5.v5/iana/patype
+gopkg.in/jcmturner/gokrb5.v5/crypto/common
+gopkg.in/jcmturner/gokrb5.v5/crypto/etype
+gopkg.in/jcmturner/gokrb5.v5/crypto/rfc3961
+gopkg.in/jcmturner/gokrb5.v5/crypto/rfc3962
+gopkg.in/jcmturner/gokrb5.v5/crypto/rfc4757
+gopkg.in/jcmturner/gokrb5.v5/crypto/rfc8009
+gopkg.in/jcmturner/gokrb5.v5/iana/etypeID
+gopkg.in/jcmturner/gokrb5.v5/iana/adtype
+gopkg.in/jcmturner/gokrb5.v5/iana/msgtype
+gopkg.in/jcmturner/gokrb5.v5/pac
+gopkg.in/jcmturner/gokrb5.v5/kadmin
+gopkg.in/jcmturner/gokrb5.v5/mstypes
+# gopkg.in/jcmturner/rpc.v0 v0.0.2
+gopkg.in/jcmturner/rpc.v0/ndr
 # gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
 gopkg.in/mgo.v2
 gopkg.in/mgo.v2/bson
